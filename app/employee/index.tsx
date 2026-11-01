@@ -1,89 +1,165 @@
 import { router } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
+
 import {
   Badge,
   Button,
   Card,
   PageTitle,
   SectionTitle,
-  colors,
   money,
   styles,
 } from "../../src/components/ui";
 import { useApp } from "../../src/context/AppContext";
 import { DEMO_EMPLOYEE_ID } from "../../src/data/mockData";
+import { colors, spacing } from "../../src/theme";
 
 export default function EmployeeHome() {
   const { employees, leaveBalance, leaveRequests, payslips } = useApp();
-  const employee = employees.find((item) => item.id === DEMO_EMPLOYEE_ID)!;
+
+  const employee = employees.find((item) => item.id === DEMO_EMPLOYEE_ID);
+
   const ownRequests = leaveRequests.filter(
     (item) => item.employeeId === DEMO_EMPLOYEE_ID,
   );
+
   const latestPayslip = payslips[0];
+
+  if (!employee) {
+    return (
+      <View style={styles.screen}>
+        <Text style={{ color: colors.textMuted }}>
+          Employee information not found.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={{ paddingBottom: 25 }}
+      contentContainerStyle={{ paddingBottom: spacing.xxl }}
     >
       <PageTitle
         title={`Hello, ${employee.name.split(" ")[0]} 👋`}
         subtitle="Here is your personal space."
       />
-      <Card style={{ backgroundColor: colors.navy, borderColor: colors.navy }}>
-        <Text style={{ color: "#C7D3E8", fontSize: 12 }}>
+
+      {/* Leave balance */}
+      <Card
+        style={{
+          backgroundColor: colors.secondary,
+          borderColor: colors.secondary,
+        }}
+      >
+        <Text style={{ color: colors.surfaceSecondary, fontSize: 12 }}>
           AVAILABLE ANNUAL LEAVE
         </Text>
+
         <View
-          style={{ flexDirection: "row", alignItems: "baseline", marginTop: 8 }}
+          style={{
+            flexDirection: "row",
+            alignItems: "baseline",
+            marginTop: spacing.sm,
+          }}
         >
           <Text
-            style={{ color: colors.white, fontSize: 38, fontWeight: "900" }}
+            style={{
+              color: colors.white,
+              fontSize: 38,
+              fontWeight: "900",
+            }}
           >
             {leaveBalance}
           </Text>
-          <Text style={{ color: "#C7D3E8", marginLeft: 8 }}>
+
+          <Text
+            style={{
+              color: colors.surfaceSecondary,
+              marginLeft: spacing.sm,
+            }}
+          >
             days remaining
           </Text>
         </View>
-        <View style={{ marginTop: 15, alignSelf: "flex-start" }}>
+
+        <View
+          style={{
+            marginTop: spacing.lg,
+            alignSelf: "flex-start",
+          }}
+        >
           <Button
             title="Request leave"
             onPress={() => router.push("/employee/leave")}
           />
         </View>
       </Card>
+
+      {/* Latest payslip */}
       <SectionTitle title="Latest payslip" />
+
       <Card>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <View>
-            <Text
-              style={{ color: colors.navy, fontSize: 16, fontWeight: "800" }}
+        {latestPayslip ? (
+          <>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              {latestPayslip.month} {latestPayslip.year}
-            </Text>
-            <Text style={{ color: colors.muted, fontSize: 12, marginTop: 4 }}>
-              Net salary
-            </Text>
-          </View>
-          <Text style={{ color: colors.teal, fontSize: 20, fontWeight: "900" }}>
-            {money(latestPayslip.netPay)}
+              <View>
+                <Text
+                  style={{
+                    color: colors.text,
+                    fontSize: 16,
+                    fontWeight: "800",
+                  }}
+                >
+                  {latestPayslip.month} {latestPayslip.year}
+                </Text>
+
+                <Text
+                  style={{
+                    color: colors.textMuted,
+                    fontSize: 12,
+                    marginTop: spacing.xs,
+                  }}
+                >
+                  Net salary
+                </Text>
+              </View>
+
+              <Text
+                style={{
+                  color: colors.primary,
+                  fontSize: 20,
+                  fontWeight: "900",
+                }}
+              >
+                {money(latestPayslip.netPay)}
+              </Text>
+            </View>
+
+            <View style={{ marginTop: spacing.lg }}>
+              <Button
+                title="View payslips"
+                variant="secondary"
+                onPress={() => router.push("/employee/payslips")}
+              />
+            </View>
+          </>
+        ) : (
+          <Text style={{ color: colors.textMuted }}>
+            No payslips available yet.
           </Text>
-        </View>
-        <View style={{ marginTop: 14 }}>
-          <Button
-            title="View payslips"
-            variant="secondary"
-            onPress={() => router.push("/employee/payslips")}
-          />
-        </View>
+        )}
       </Card>
+
+      {/* Recent leave requests */}
       <SectionTitle title="My recent leave requests" />
+
       {ownRequests.slice(0, 3).map((request) => (
         <Card
           key={request.id}
@@ -94,16 +170,35 @@ export default function EmployeeHome() {
           }}
         >
           <View>
-            <Text style={{ color: colors.navy, fontWeight: "700" }}>
+            <Text
+              style={{
+                color: colors.text,
+                fontWeight: "700",
+              }}
+            >
               {request.type}
             </Text>
-            <Text style={{ color: colors.muted, fontSize: 12, marginTop: 4 }}>
+
+            <Text
+              style={{
+                color: colors.textMuted,
+                fontSize: 12,
+                marginTop: spacing.xs,
+              }}
+            >
               {request.startDate} · {request.days} day(s)
             </Text>
           </View>
+
           <Badge value={request.status} />
         </Card>
       ))}
+
+      {ownRequests.length === 0 && (
+        <Text style={{ color: colors.textMuted }}>
+          You have no leave requests yet.
+        </Text>
+      )}
     </ScrollView>
   );
 }

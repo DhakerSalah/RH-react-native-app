@@ -1,17 +1,18 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 
-import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../src/auth/useAuth";
 import LogoutButton from "../../src/components/LogoutButton";
+import { colors } from "../../src/theme";
 
 export default function EmployeeLayout() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -28,15 +29,15 @@ export default function EmployeeLayout() {
     <Tabs
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: colors.surface,
         },
-        headerTintColor: "#172B4D",
+        headerTintColor: colors.text,
         headerTitleStyle: {
           fontWeight: "bold",
         },
         headerRight: () => <LogoutButton />,
-        tabBarActiveTintColor: "#176B63",
-        tabBarInactiveTintColor: "#94A3B8",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
       }}
     >
       <Tabs.Screen
@@ -101,3 +102,12 @@ export default function EmployeeLayout() {
     </Tabs>
   );
 }
+
+const styles = {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    backgroundColor: colors.background,
+  },
+};

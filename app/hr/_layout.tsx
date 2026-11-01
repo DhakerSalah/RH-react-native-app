@@ -4,7 +4,7 @@ import { ActivityIndicator, View } from "react-native";
 
 import { useAuth } from "../../src/auth/useAuth";
 import LogoutButton from "../../src/components/LogoutButton";
-import { colors, spacing } from "../../src/theme";
+import { colors } from "../../src/theme";
 
 export default function HRLayout() {
   const { user, isLoading } = useAuth();
@@ -40,19 +40,6 @@ export default function HRLayout() {
 
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-          height: 65,
-          paddingBottom: spacing.sm,
-          paddingTop: spacing.xs,
-        },
-
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "600",
-        },
       }}
     >
       <Tabs.Screen

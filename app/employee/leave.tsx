@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { useAuth } from "../../src/auth/useAuth";
 import {
   Badge,
   Button,
@@ -17,22 +18,46 @@ import {
   styles,
 } from "../../src/components/ui";
 import { useApp } from "../../src/context/AppContext";
-import { DEMO_EMPLOYEE_ID } from "../../src/data/mockData";
 import { colors, radius, spacing } from "../../src/theme";
 
+type LeaveType = "Annual leave" | "Sick leave";
+
+function isValidDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
 export default function MyLeaveScreen() {
+  const { user } = useAuth();
   const { leaveBalance, leaveRequests, addLeaveRequest } = useApp();
 
   const [visible, setVisible] = useState(false);
-  const [type, setType] = useState("Annual leave");
+  const [type, setType] = useState<LeaveType>("Annual leave");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [days, setDays] = useState("1");
   const [reason, setReason] = useState("");
 
+  // Display only the authenticated employee's requests.
   const ownRequests = leaveRequests.filter(
-    (item) => item.employeeId === DEMO_EMPLOYEE_ID,
+    (item) => item.employeeId === user?.id,
   );
+
+  const resetForm = () => {
+    setStartDate("");
+    setEndDate("");
+    setDays("1");
+    setReason("");
+    setType("Annual leave");
+  };
 
   const closeModal = () => {
     setVisible(false);
@@ -40,17 +65,34 @@ export default function MyLeaveScreen() {
 
   const submit = () => {
     const count = Number(days);
+    const start = startDate.trim();
+    const end = endDate.trim();
+    const requestReason = reason.trim();
+
+    if (!user || user.role !== "employee") {
+      Alert.alert("Error", "You must be logged in as an employee.");
+      return;
+    }
 
     if (
-      !startDate.trim() ||
-      !endDate.trim() ||
-      !reason.trim() ||
+      !isValidDate(start) ||
+      !isValidDate(end) ||
+      !requestReason ||
       !Number.isInteger(count) ||
       count < 1
     ) {
       Alert.alert(
         "Check your request",
-        "Enter start date, end date, a valid number of days and a reason.",
+        "Enter valid dates in YYYY-MM-DD format, a positive number of days and a reason.",
+      );
+      return;
+    }
+
+    // ISO date strings can be compared chronologically.
+    if (end < start) {
+      Alert.alert(
+        "Invalid date range",
+        "The end date must be on or after the start date.",
       );
       return;
     }
@@ -63,20 +105,24 @@ export default function MyLeaveScreen() {
       return;
     }
 
-    addLeaveRequest({
+    const success = addLeaveRequest({
       type,
-      startDate: startDate.trim(),
-      endDate: endDate.trim(),
+      startDate: start,
+      endDate: end,
       days: count,
-      reason: reason.trim(),
+      reason: requestReason,
     });
 
-    setVisible(false);
-    setStartDate("");
-    setEndDate("");
-    setDays("1");
-    setReason("");
-    setType("Annual leave");
+    if (!success) {
+      Alert.alert(
+        "Request failed",
+        "Unable to submit your request. Please log in again.",
+      );
+      return;
+    }
+
+    closeModal();
+    resetForm();
 
     Alert.alert("Request submitted", "Your leave request has been sent to HR.");
   };
@@ -88,7 +134,6 @@ export default function MyLeaveScreen() {
         subtitle="Check your balance and leave history."
       />
 
-      {/* Leave balance */}
       <Card
         style={{
           backgroundColor: colors.secondary,
@@ -117,7 +162,7 @@ export default function MyLeaveScreen() {
             marginTop: spacing.xs,
           }}
         >
-          Available in this demo account
+          Remaining annual leave days
         </Text>
       </Card>
 
@@ -198,7 +243,6 @@ export default function MyLeaveScreen() {
         )}
       </ScrollView>
 
-      {/* New leave request modal */}
       <Modal
         visible={visible}
         transparent
@@ -212,121 +256,132 @@ export default function MyLeaveScreen() {
             justifyContent: "flex-end",
           }}
         >
-          <View
-            style={{
-              backgroundColor: colors.background,
-              borderTopLeftRadius: radius.xl,
-              borderTopRightRadius: radius.xl,
-              padding: spacing.xl,
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: "flex-end",
             }}
           >
-            <Text
-              style={{
-                color: colors.text,
-                fontSize: 20,
-                fontWeight: "800",
-                marginBottom: spacing.lg,
-              }}
-            >
-              New leave request
-            </Text>
-
-            <Text
-              style={{
-                color: colors.textMuted,
-                fontSize: 12,
-                marginBottom: spacing.sm,
-              }}
-            >
-              Leave type
-            </Text>
-
             <View
               style={{
-                flexDirection: "row",
-                gap: spacing.sm,
-                marginBottom: spacing.md,
+                backgroundColor: colors.background,
+                borderTopLeftRadius: radius.xl,
+                borderTopRightRadius: radius.xl,
+                padding: spacing.xl,
               }}
             >
-              {(["Annual leave", "Sick leave"] as const).map((item) => (
-                <Pressable
-                  key={item}
-                  onPress={() => setType(item)}
-                  style={{
-                    borderRadius: radius.full,
-                    paddingVertical: spacing.sm,
-                    paddingHorizontal: spacing.md,
-                    backgroundColor:
-                      type === item ? colors.secondary : colors.surface,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                  }}
-                >
-                  <Text
+              <Text
+                style={{
+                  color: colors.text,
+                  fontSize: 20,
+                  fontWeight: "800",
+                  marginBottom: spacing.lg,
+                }}
+              >
+                New leave request
+              </Text>
+
+              <Text
+                style={{
+                  color: colors.textMuted,
+                  fontSize: 12,
+                  marginBottom: spacing.sm,
+                }}
+              >
+                Leave type
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: spacing.sm,
+                  marginBottom: spacing.md,
+                }}
+              >
+                {(["Annual leave", "Sick leave"] as const).map((item) => (
+                  <Pressable
+                    key={item}
+                    onPress={() => setType(item)}
                     style={{
-                      color: type === item ? colors.white : colors.textMuted,
-                      fontWeight: "700",
-                      fontSize: 12,
+                      borderRadius: radius.full,
+                      paddingVertical: spacing.sm,
+                      paddingHorizontal: spacing.md,
+                      backgroundColor:
+                        type === item ? colors.secondary : colors.surface,
+                      borderWidth: 1,
+                      borderColor: colors.border,
                     }}
                   >
-                    {item}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <TextInput
-              value={startDate}
-              onChangeText={setStartDate}
-              placeholder="Start date (YYYY-MM-DD)"
-              placeholderTextColor={colors.textMuted}
-              style={styles.input}
-            />
-
-            <TextInput
-              value={endDate}
-              onChangeText={setEndDate}
-              placeholder="End date (YYYY-MM-DD)"
-              placeholderTextColor={colors.textMuted}
-              style={styles.input}
-            />
-
-            <TextInput
-              value={days}
-              onChangeText={setDays}
-              placeholder="Number of days"
-              placeholderTextColor={colors.textMuted}
-              keyboardType="number-pad"
-              style={styles.input}
-            />
-
-            <TextInput
-              value={reason}
-              onChangeText={setReason}
-              placeholder="Reason"
-              placeholderTextColor={colors.textMuted}
-              style={styles.input}
-            />
-
-            <View
-              style={{
-                flexDirection: "row",
-                gap: spacing.sm,
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <Button
-                  title="Cancel"
-                  variant="secondary"
-                  onPress={closeModal}
-                />
+                    <Text
+                      style={{
+                        color: type === item ? colors.white : colors.textMuted,
+                        fontWeight: "700",
+                        fontSize: 12,
+                      }}
+                    >
+                      {item}
+                    </Text>
+                  </Pressable>
+                ))}
               </View>
 
-              <View style={{ flex: 1 }}>
-                <Button title="Submit request" onPress={submit} />
+              <TextInput
+                value={startDate}
+                onChangeText={setStartDate}
+                placeholder="Start date (YYYY-MM-DD)"
+                placeholderTextColor={colors.textMuted}
+                style={styles.input}
+                autoCapitalize="none"
+              />
+
+              <TextInput
+                value={endDate}
+                onChangeText={setEndDate}
+                placeholder="End date (YYYY-MM-DD)"
+                placeholderTextColor={colors.textMuted}
+                style={styles.input}
+                autoCapitalize="none"
+              />
+
+              <TextInput
+                value={days}
+                onChangeText={setDays}
+                placeholder="Number of days"
+                placeholderTextColor={colors.textMuted}
+                keyboardType="number-pad"
+                style={styles.input}
+              />
+
+              <TextInput
+                value={reason}
+                onChangeText={setReason}
+                placeholder="Reason"
+                placeholderTextColor={colors.textMuted}
+                style={styles.input}
+                multiline
+              />
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: spacing.sm,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Button
+                    title="Cancel"
+                    variant="secondary"
+                    onPress={closeModal}
+                  />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Button title="Submit request" onPress={submit} />
+                </View>
               </View>
             </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </View>

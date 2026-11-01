@@ -19,17 +19,16 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
     status: "Active",
   },
   {
-    id: "2",
-    name: "John Doe",
-    email: "employee@ressourci.com",
+    id: "emp-1",
+    name: "Dhaker Salah",
+    email: "dhaker@ressourci.com",
     password: "emp123456",
     role: "employee",
-    department: "IT",
-    position: "Software Developer",
+    department: "Engineering",
+    position: "Frontend Developer",
     status: "Active",
   },
 ];
-
 // Authenticate user using static accounts
 export const loginUser = async (
   email: string,

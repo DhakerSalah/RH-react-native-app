@@ -11,6 +11,8 @@ export type User = {
   status: "Active" | "Inactive";
 };
 
+export type Employee = User;
+
 export type LeaveRequest = {
   id: string;
   employeeId: string;

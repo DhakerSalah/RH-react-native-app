@@ -53,7 +53,6 @@ export default function EmployeesScreen() {
       email: email.trim(),
       department: department.trim(),
       position: position.trim(),
-      role: "employee",
     });
 
     setName("");

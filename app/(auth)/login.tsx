@@ -53,7 +53,7 @@ export default function LoginScreen() {
       setEmail("hr@ressourci.com");
       setPassword("hr123456");
     } else {
-      setEmail("employee@ressourci.com");
+      setEmail("dhaker@ressourci.com");
       setPassword("emp123456");
     }
 

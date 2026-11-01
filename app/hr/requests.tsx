@@ -10,7 +10,6 @@ import {
   styles,
 } from "../../src/components/ui";
 import { useApp } from "../../src/context/AppContext";
-
 import { radius, spacing } from "../../src/theme";
 import { RequestStatus } from "../../src/types";
 
@@ -28,18 +27,29 @@ export default function RequestsScreen() {
   );
 
   const update = (id: string, status: RequestStatus, employeeName: string) => {
+    const action = status === "Approved" ? "Approve" : "Reject";
+
     Alert.alert(
-      `${status} leave?`,
-      `${status === "Approved" ? "Approve" : "Reject"} ${employeeName}'s request?`,
+      `${action} leave request?`,
+      `${action} ${employeeName}'s request?`,
       [
         {
           text: "Cancel",
           style: "cancel",
         },
         {
-          text: status,
+          text: action,
           style: status === "Rejected" ? "destructive" : "default",
-          onPress: () => updateLeaveStatus(id, status),
+          onPress: () => {
+            const success = updateLeaveStatus(id, status);
+
+            if (!success) {
+              Alert.alert(
+                "Unable to process request",
+                "This request may already have been processed, or the employee may not have enough annual leave days remaining.",
+              );
+            }
+          },
         },
       ],
     );
@@ -52,7 +62,6 @@ export default function RequestsScreen() {
         subtitle="Review employee time-off requests."
       />
 
-      {/* Filters */}
       <View style={localStyles.filters}>
         {filters.map((item) => {
           const isActive = filter === item;
@@ -79,7 +88,6 @@ export default function RequestsScreen() {
         })}
       </View>
 
-      {/* Requests list */}
       <ScrollView showsVerticalScrollIndicator={false}>
         {items.map((request) => (
           <Card key={request.id}>

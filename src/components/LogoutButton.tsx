@@ -1,8 +1,8 @@
 import { useState } from "react";
-
 import { ActivityIndicator, Alert, Pressable, Text } from "react-native";
 
 import { useAuth } from "../auth/useAuth";
+import { colors, spacing } from "../theme";
 
 export default function LogoutButton() {
   const { logout } = useAuth();
@@ -36,17 +36,17 @@ export default function LogoutButton() {
       onPress={handleLogout}
       disabled={loading}
       style={{
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        marginRight: 8,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.sm,
+        marginRight: spacing.sm,
       }}
     >
       {loading ? (
-        <ActivityIndicator color="#176B63" />
+        <ActivityIndicator color={colors.primary} />
       ) : (
         <Text
           style={{
-            color: "#DC2626",
+            color: colors.danger,
             fontWeight: "600",
           }}
         >

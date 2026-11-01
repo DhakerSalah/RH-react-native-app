@@ -1,16 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
+
 import { useAuth } from "../../src/auth/useAuth";
 import LogoutButton from "../../src/components/LogoutButton";
+import { colors, spacing } from "../../src/theme";
 
 export default function HRLayout() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -27,15 +29,30 @@ export default function HRLayout() {
     <Tabs
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: colors.surface,
         },
-        headerTintColor: "#172B4D",
+        headerTintColor: colors.text,
         headerTitleStyle: {
           fontWeight: "bold",
         },
+        headerShadowVisible: false,
         headerRight: () => <LogoutButton />,
-        tabBarActiveTintColor: "#176B63",
-        tabBarInactiveTintColor: "#94A3B8",
+
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
+
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          height: 65,
+          paddingBottom: spacing.sm,
+          paddingTop: spacing.xs,
+        },
+
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+        },
       }}
     >
       <Tabs.Screen
@@ -52,6 +69,7 @@ export default function HRLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="employees"
         options={{
@@ -66,6 +84,7 @@ export default function HRLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="requests"
         options={{
@@ -80,6 +99,7 @@ export default function HRLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="equipment"
         options={{
@@ -97,3 +117,12 @@ export default function HRLayout() {
     </Tabs>
   );
 }
+
+const styles = {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    backgroundColor: colors.background,
+  },
+};

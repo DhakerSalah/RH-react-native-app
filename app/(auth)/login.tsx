@@ -1,5 +1,5 @@
+import { useRouter } from "expo-router";
 import { useState } from "react";
-
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -11,9 +11,8 @@ import {
   TextInput,
   View,
 } from "react-native";
-
-import { useRouter } from "expo-router";
 import { useAuth } from "../../src/auth/useAuth";
+import { colors, radius, spacing } from "../../src/theme";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -21,7 +20,6 @@ export default function LoginScreen() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -38,6 +36,7 @@ export default function LoginScreen() {
       setIsSubmitting(true);
       const authenticatedUser = await login(email, password);
       setIsSubmitting(false);
+
       if (authenticatedUser.role === "hr") {
         router.replace("/hr");
       } else {
@@ -75,7 +74,6 @@ export default function LoginScreen() {
         </View>
 
         <Text style={styles.title}>Ressourci HR</Text>
-
         <Text style={styles.subtitle}>Human Resources Management</Text>
 
         <View style={styles.form}>
@@ -90,7 +88,7 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter your email"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textMuted}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -104,7 +102,7 @@ export default function LoginScreen() {
             <TextInput
               style={styles.passwordInput}
               placeholder="Enter your password"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={colors.textMuted}
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
@@ -125,7 +123,7 @@ export default function LoginScreen() {
             disabled={isSubmitting}
           >
             {isSubmitting ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={colors.white} />
             ) : (
               <Text style={styles.loginButtonText}>Sign In</Text>
             )}
@@ -157,28 +155,28 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
   },
 
   content: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 24,
+    padding: spacing.xxl,
   },
 
   logoContainer: {
     width: 70,
     height: 65,
-    borderRadius: 18,
-    backgroundColor: "#176B63",
+    borderRadius: radius.lg,
+    backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
 
   logo: {
-    color: "#FFFFFF",
+    color: colors.white,
     fontSize: 25,
     fontWeight: "bold",
   },
@@ -186,85 +184,85 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 27,
     fontWeight: "bold",
-    color: "#172B4D",
+    color: colors.text,
     textAlign: "center",
   },
 
   subtitle: {
-    color: "#64748B",
+    color: colors.textSecondary,
     textAlign: "center",
-    marginTop: 6,
-    marginBottom: 35,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xxxl,
   },
 
   form: {
-    backgroundColor: "#FFFFFF",
-    padding: 22,
-    borderRadius: 18,
+    backgroundColor: colors.surface,
+    padding: spacing.xl,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
   },
 
   heading: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#172B4D",
+    color: colors.text,
   },
 
   description: {
-    color: "#64748B",
-    marginTop: 7,
-    marginBottom: 25,
+    color: colors.textSecondary,
+    marginTop: spacing.sm,
+    marginBottom: spacing.xl,
   },
 
   label: {
-    color: "#334155",
+    color: colors.secondaryLight,
     fontWeight: "600",
-    marginBottom: 8,
-    marginTop: 15,
+    marginBottom: spacing.sm,
+    marginTop: spacing.md,
   },
 
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    color: "#172B4D",
+    borderColor: colors.borderDark,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    color: colors.text,
   },
 
   passwordContainer: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 10,
+    borderColor: colors.borderDark,
+    borderRadius: radius.md,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
+    paddingHorizontal: spacing.md,
   },
 
   passwordInput: {
     flex: 1,
-    color: "#172B4D",
+    color: colors.text,
   },
 
   showPassword: {
-    color: "#176B63",
+    color: colors.primary,
     fontWeight: "600",
   },
 
   error: {
-    color: "#DC2626",
-    marginTop: 12,
+    color: colors.danger,
+    marginTop: spacing.md,
   },
 
   loginButton: {
     height: 52,
-    backgroundColor: "#176B63",
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 25,
+    marginTop: spacing.xl,
   },
 
   disabledButton: {
@@ -272,38 +270,38 @@ const styles = StyleSheet.create({
   },
 
   loginButtonText: {
-    color: "#FFFFFF",
+    color: colors.white,
     fontWeight: "bold",
     fontSize: 16,
   },
 
   demoTitle: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontWeight: "bold",
     fontSize: 11,
     textAlign: "center",
-    marginTop: 25,
-    marginBottom: 10,
+    marginTop: spacing.xl,
+    marginBottom: spacing.sm,
   },
 
   demoButton: {
     borderWidth: 1,
-    borderColor: "#DCE5E8",
-    padding: 12,
-    borderRadius: 9,
-    marginTop: 8,
+    borderColor: colors.border,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    marginTop: spacing.sm,
     alignItems: "center",
   },
 
   demoButtonText: {
-    color: "#176B63",
+    color: colors.primary,
     fontWeight: "600",
   },
 
   footer: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     textAlign: "center",
-    marginTop: 30,
+    marginTop: spacing.xxxl,
     fontSize: 12,
   },
 });
